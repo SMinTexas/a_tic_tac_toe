@@ -1,25 +1,28 @@
+import data                         #data.py
+import display                      #display.py
+import random                       #python library
 
-import display
-import data
-import random
-import sys
-
+# Need copy of the initial board to reset the board when starting a new game
+# after completing a previous game
 def get_copy_of_board(board):
     for i in board:
         data.duplicate_board.append(i)
     return data.duplicate_board
 
+# Clears previous game data from the duplicate board and resets for next game
 def manage_board(board):
     del board[1:]
     for i in range(1,10):
         board.append(str(i))
 
+# Randomly determine which player goes first
 def who_goes_first():
     if random.randint(0, 1) == 0:
         return data.players[0]
     else:
         return data.players[1]
 
+# Switch turns between players
 def switch_player(players, current_player):
     for index, player in enumerate(players, start=0):
         if players[index] == current_player:
@@ -29,6 +32,7 @@ def switch_player(players, current_player):
             current_player = players[index]
             return current_player
 
+# Check for a valid move
 def check_move(board, move):
     move = int(move)
     if is_space_open(board, move):
@@ -36,25 +40,26 @@ def check_move(board, move):
     else:
         return False
 
+# Determine the marker to place on the board (X or O)
 def determine_mark(current_player):
     player_index = data.players.index(current_player)
     mark = data.player_marks[player_index]
     return mark
 
+# Must know if the space is open prior to making the move
 def is_space_open(board, move):
-    #return board[move] == " "
     move_to_evaluate = str(move)
-    #for move_to_evaluate in range(1,10):
-        #if board[move] in ('1','2','3','4','5','6','7','8','9'):
     if move_to_evaluate in board[move]:
         return True
     else:
         return False
 
+# Place the current move on the board
 def update_board(board, move, player_mark):
     move = int(move)
     board[move] = player_mark
 
+# Determine if a player has won the game
 def is_game_won(board, mark):
     return ((board[7] == mark and board[8] == mark and board[9] == mark) or
     (board[4] == mark and board[5] == mark and board[6] == mark) or
@@ -65,12 +70,14 @@ def is_game_won(board, mark):
     (board[7] == mark and board[5] == mark and board[3] == mark) or
     (board[9] == mark and board[5] == mark and board[1] == mark))
 
+# Determine if the board is full (i.e. tie game)
 def is_board_full(board):
     for i in range(1,10):
         if is_space_open(board, i):
             return False
     return True
 
+# Game statistics
 def increment_winner_totals(players, current_player, tallies):
     for index, player in enumerate(players, start=0):
         if players[index] == current_player:
@@ -84,22 +91,10 @@ def increment_winner_totals(players, current_player, tallies):
             tallies[index + 1] = total
             return tallies
 
+# Do you wish to continue playing?
 def keep_playing():
     choice = input("Do you wish to continue playing? (y or n) ")
     return choice
-
-def audit_moves(current_player, move, game):
-    # This is not currently working
-    player_index = data.players.index(current_player)
-    #data.audit_player_moves[player_index].append(move)
-    #data.audit_player_moves[game][player_index].append(move)
-    for index, audit in enumerate(data.audit_player_moves,start=0):
-        #audit.insert(game-1,game)
-        print(f"index = {index} | audit = {audit}")
-        data.audit_player_moves[index][index] = move
-    print(f"AUDIT {audit}")
-    print(f"AUDIT_MOVES = {data.audit_player_moves}")
-
 
 # Main function
 def main():
@@ -111,17 +106,14 @@ def main():
     continue_game = "n"
     display.get_players(data.players)
     data.current_player = who_goes_first()
-    #display.draw_board(data.game_board)
     display.get_started()
     while game_is_playing:
         display.draw_board(data.game_board)
         display.player_control(data.current_player)
         move = display.prompt_move(data.current_player)
-        #check_move(data.game_board, move)
         while not check_move(data.game_board, move):
             display.space_taken()
             move = display.prompt_move(data.current_player)
-        audit_moves(data.current_player, move, (total_games + 1))  
         mark = determine_mark(data.current_player)
         update_board(data.game_board, move,  mark)
         display.draw_board(data.game_board)
